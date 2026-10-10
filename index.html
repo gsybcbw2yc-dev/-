@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123b32"><title>文化祭 会計・在庫管理</title>
+<style>
+:root{--g:#123b32;--g2:#1d5b4b;--bg:#f3f6f4;--card:#fff;--ink:#17231f;--muted:#697871;--line:#dce5df;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
+header{background:var(--g);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:4}.head{display:flex;justify-content:space-between;align-items:center;gap:8px}.brand{font-weight:850;font-size:18px}.sub{font-size:12px;opacity:.8;margin-top:3px}.pill{border:1px solid #ffffff70;border-radius:20px;padding:5px 8px;font-size:11px}nav{display:flex;gap:6px;overflow:auto;margin-top:13px}nav button{border:0;border-radius:9px;padding:10px 13px;background:#ffffff20;color:#fff;font-weight:700;white-space:nowrap}nav button.active{background:#fff;color:var(--g)}
+main{max-width:1100px;margin:auto;padding:16px 12px 44px}.view{display:none}.view.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}.label{font-size:12px;color:var(--muted)}.stat{font-size:24px;font-weight:850;margin-top:5px;overflow-wrap:anywhere}.section{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0 12px}.section h2{font-size:18px;margin:0}.muted,.small{font-size:12px;color:var(--muted)}.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product{border:1px solid var(--line);background:#fff;border-radius:14px;padding:13px;display:flex;flex-direction:column;gap:8px}.pname{font-weight:800}.price{font-weight:850;color:var(--g2);font-size:20px}.qtyrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.qtyrow button{width:42px;height:42px;border:0;border-radius:10px;background:#e7f1eb;color:var(--g);font-size:24px;font-weight:800}.qty{font-size:20px;font-weight:800}.primary,.secondary,.danger{border-radius:10px;padding:11px 13px;font-weight:750}.primary{border:0;background:var(--g2);color:#fff}.secondary{border:1px solid var(--line);background:#fff;color:var(--ink)}.danger{border:1px solid #f2c7c3;background:#fff4f2;color:var(--red)}.wide{width:100%}.checkout{position:sticky;bottom:8px;margin-top:14px;background:var(--g);color:white;border-radius:15px;padding:14px;box-shadow:0 8px 24px #102c2230}.checkouttop{display:flex;justify-content:space-between;align-items:center}.total{font-size:27px;font-weight:900}.checkout button{margin-top:10px;width:100%;background:#fff;color:var(--g);border:0;border-radius:10px;padding:13px;font-weight:900}.notice{padding:11px 12px;border-radius:10px;background:#fff7e6;color:#795600;font-size:13px;margin-bottom:12px}.error{background:#fff0ee;color:var(--red)}.success{background:#eaf7ef;color:#17603b}.hidden{display:none!important}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}table{width:100%;border-collapse:collapse;min-width:610px}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px}th{background:#f7faf8;color:#53635a;font-size:12px;white-space:nowrap}tr:last-child td{border-bottom:0}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;padding:11px;border:1px solid #cbd7cf;border-radius:9px;background:#fff}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.warn{color:var(--red);font-weight:800}.empty{text-align:center;padding:22px;color:var(--muted)}.auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.auth-panel{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.modalback{position:fixed;inset:0;background:#0008;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}.modal{background:#fff;border-radius:16px;padding:20px;width:min(480px,100%);max-height:90vh;overflow:auto}.modal h3{margin-top:0}.modal .field{margin:12px 0}footer{text-align:center;padding:20px;color:var(--muted);font-size:11px}
+@media(min-width:700px){main{padding:24px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.products{grid-template-columns:repeat(3,minmax(0,1fr))}.checkout{max-width:520px;margin-left:auto}.formgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header><div class="head"><div><div class="brand" id="brand">文化祭 会計・在庫管理</div><div class="sub" id="subtitle">クラウド共有レジ</div></div><div class="pill" id="connection">未ログイン</div></div><nav id="nav" class="hidden"><button class="active" data-view="cashier">会計</button><button data-view="summary">売上・利益</button><button data-view="stock">在庫</button><button data-view="history">会計履歴</button><button data-view="admin">管理者</button></nav></header>
+<main>
+<div id="notice" class="notice hidden"></div>
+<section id="loginView">
+<div class="card" style="max-width:480px;margin:28px auto"><h2 style="margin-top:0">ログイン</h2><p class="muted">管理者または会計スタッフのアカウントでログインしてください。</p>
+<div class="field" style="margin:14px 0"><label>メールアドレス</label><input id="email" type="email" autocomplete="username" placeholder="staff@example.com"></div>
+<div class="field" style="margin:14px 0"><label>パスワード（6文字以上）</label><input id="password" type="password" autocomplete="current-password"></div>
+<label class="small" style="display:flex;align-items:center;gap:8px;margin:8px 0 14px"><input id="rememberEmail" type="checkbox" checked> この端末にメールアドレスを記憶する</label>
+<button class="primary wide" id="loginBtn">ログイン</button>
+<p class="small">ログイン状態はこのブラウザに保持されます。通常は毎回ログインし直す必要はありません。パスワードは保存しません。</p>
+<div class="auth-actions"><button class="secondary wide" id="showSignup">新規アカウント申請</button></div>
+<div id="signupPanel" class="auth-panel hidden">
+<h3>スタッフアカウント申請</h3>
+<p class="small">登録すると会計スタッフとして自動登録され、すぐにログインして利用できます。管理者権限は既存の管理者が設定します。</p>
+<div class="field" style="margin:12px 0"><label>メールアドレス</label><input id="signupEmail" type="email" autocomplete="email" placeholder="staff@example.com"></div>
+<div class="field" style="margin:12px 0"><label>パスワード（6文字以上）</label><input id="signupPassword" type="password" autocomplete="new-password"></div>
+<div class="field" style="margin:12px 0"><label>パスワード（確認）</label><input id="signupPassword2" type="password" autocomplete="new-password"></div>
+<div class="auth-actions"><button class="primary" id="signupBtn">スタッフとして登録</button><button class="secondary" id="hideSignup">戻る</button></div>
+</div>
+<p class="small">新規登録は会計スタッフ権限になります。管理者権限は管理者が設定します。</p></div></section>
+<div id="app" class="hidden">
+<section id="view-cashier" class="view active"><div class="section"><h2>商品を選択</h2><span class="muted" id="dayLabel">営業日 1日目</span></div><div class="field" style="max-width:220px;margin-bottom:12px"><label>営業日</label><select id="day"><option value="1">1日目</option><option value="2">2日目</option><option value="3">3日目</option></select></div><div id="productGrid" class="products"></div>
+<div id="cashStatus" class="card" style="margin-top:12px;margin-bottom:12px"></div>
+<div class="checkout"><div class="checkouttop"><div><div style="opacity:.8;font-size:12px">今回のお会計</div><div class="total" id="cartTotal">¥0</div></div><div id="cartCount">0点</div></div><button id="checkoutBtn">預かり金を入力して会計</button><div class="small" style="color:#d4e5dc;margin-top:8px">現金の預かり金とお釣りを記録して確定します。</div></div></section>
+<section id="view-summary" class="view"><div class="section"><h2>売上・利益</h2><button class="secondary" id="exportSummary">CSV出力</button></div><div class="grid" id="summaryCards"></div><div class="section"><h2>商品別集計</h2></div><div class="tablewrap"><table><thead><tr><th>商品</th><th>販売数</th><th>売上</th><th>原価</th><th>利益</th><th>残在庫</th></tr></thead><tbody id="summaryRows"></tbody></table></div><div class="section"><h2>日別売上</h2></div><div class="tablewrap"><table><thead><tr><th>営業日</th><th>会計件数</th><th>点数</th><th>売上</th><th>原価</th><th>利益</th></tr></thead><tbody id="dailyRows"></tbody></table></div></section>
+<section id="view-stock" class="view"><div class="section"><h2>在庫管理</h2><button class="primary" id="addProduct">商品を追加</button></div><div class="notice">仕入数・価格の変更は管理者のみ可能です。残数は有効な会計から計算します。</div><div class="tablewrap"><table><thead><tr><th>商品</th><th>販売価格</th><th>原価</th><th>仕入数</th><th>販売数</th><th>残数</th><th>状態</th><th>操作</th></tr></thead><tbody id="stockRows"></tbody></table></div></section>
+<section id="view-history" class="view"><div class="section"><h2>会計履歴</h2><button class="secondary" id="exportHistory">履歴CSV</button></div><div class="notice">取消済みの会計は売上から除外し、在庫を戻します。取消操作は履歴に残ります。</div><div class="tablewrap"><table><thead><tr><th>日時</th><th>日</th><th>明細</th><th>合計</th><th>預かり金</th><th>お釣り</th><th>状態</th><th>操作</th></tr></thead><tbody id="historyRows"></tbody></table></div></section>
+<section id="view-admin" class="view"><div class="section"><h2>管理者設定</h2></div><div class="card" style="margin-bottom:12px"><h3>店舗設定</h3><div class="formgrid">
+<div class="field"><label>文化祭・店舗名</label><input id="eventName" placeholder="例：七隈祭 模擬店"></div>
+<div class="field"><label>在庫警告しきい値</label><input id="lowStock" type="number" min="0" value="10"></div>
+<div class="field"><label>1日目 レジ準備金（円）</label><input id="floatDay1" type="number" min="0" step="1" value="10000"></div>
+<div class="field"><label>2日目 レジ準備金（円）</label><input id="floatDay2" type="number" min="0" step="1" value="10000"></div>
+<div class="field"><label>3日目 レジ準備金（円）</label><input id="floatDay3" type="number" min="0" step="1" value="10000"></div>
+</div>
+<p class="small">準備金は各日の開店時にレジへ入れる釣り銭です。想定現金残高＝準備金＋有効会計の売上合計で計算します。</p>
+<div class="actions"><button class="primary" id="saveSettings">設定を保存</button></div></div><div class="card" style="margin-bottom:12px"><h3>アカウント・権限管理</h3><p class="muted">新規登録アカウントは会計スタッフとして自動登録されます。既存アカウントの権限をスタッフ／管理者に変更できます。自分自身の権限はこの画面から変更できません。</p><div class="actions"><button class="secondary" id="refreshPending">アカウント一覧を更新</button></div><div class="tablewrap" style="margin-top:12px"><table style="min-width:620px"><thead><tr><th>メールアドレス</th><th>現在の権限</th><th>変更後の権限</th><th>操作</th></tr></thead><tbody id="pendingRows"><tr><td colspan="4" class="empty">アカウント一覧を読み込んでください</td></tr></tbody></table></div></div><div class="card"><h3>データ管理</h3><div class="actions"><button class="secondary" id="backup">JSONバックアップ</button><button class="secondary" id="seed">初期商品を登録（空のとき）</button><button class="secondary" id="logout">ログアウト</button></div><p class="small">バックアップは現在読み込まれている商品・会計履歴を出力します。</p></div></section>
+</div>
+<footer>文化祭会計ツール · Firebaseクラウド共有 · 現金会計</footer>
+</main><div id="modalRoot" class="hidden"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, onSnapshot, query, orderBy, where, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const $=id=>document.getElementById(id), yen=n=>'¥'+Math.round(Number(n)||0).toLocaleString('ja-JP'), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const seedProducts=[['たこ焼き',10,1,100],['飲料',20,2,100],['商品3',30,3,100],['商品4',40,4,100],['商品5',50,5,100],['商品6',60,6,100],['商品7',70,7,100]];
+let app,auth,db,user=null,role=null,registrationInProgress=false,products=[],sales=[],settings={eventName:'文化祭 模擬店',lowStock:10,openingCashByDay:{'1':10000,'2':10000,'3':10000}},cart={},day=1,unsubs=[],busy=false;
+const productCol=()=>collection(db,'products'), salesCol=()=>collection(db,'sales');
+function notice(msg,type=''){ $('notice').textContent=msg;$('notice').className='notice '+type; }
+function clearNotice(){ $('notice').className='notice hidden'; }
+function moneyFmt(s){return s.toLocaleString('ja-JP')}
+function activeSales(){return sales.filter(s=>!s.voided)}
+function sold(id){return activeSales().reduce((n,s)=>n+s.items.reduce((m,i)=>m+(i.id===id?i.qty:0),0),0)}
+function remaining(p){return Math.max(0,Number(p.stock||0))}
+function sum(ss){return ss.reduce((n,s)=>n+Number(s.total||0),0)}
+function costSum(ss){return ss.reduce((n,s)=>n+s.items.reduce((m,i)=>m+i.cost*i.qty,0),0)}
+function openingCash(d){return Math.max(0,Number(settings.openingCashByDay?.[String(d)]??10000)||0)}
+function drawerExpected(d){return openingCash(d)+sum(activeSales().filter(s=>Number(s.day)===Number(d)))}
+function canAdmin(){return role==='admin'}
+function clearSubs(){unsubs.forEach(f=>f());unsubs=[]}
+function showApp(on){$('loginView').classList.toggle('hidden',on);$('app').classList.toggle('hidden',!on);$('nav').classList.toggle('hidden',!on)}
+function nav(view){if(view==='admin'&&canAdmin())loadPendingUsers();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));if(view==='admin'&&!canAdmin()){notice('管理者権限が必要です。','error');nav('cashier')}}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>nav(b.dataset.view));
+function render(){ $('brand').textContent=settings.eventName||'文化祭 会計・在庫管理';$('subtitle').textContent=user?`${user.email||user.uid} · ${role==='admin'?'管理者':'会計スタッフ'}`:'クラウド共有レジ';$('connection').textContent=user?'クラウド接続中':'未ログイン';renderProducts();renderSummary();renderStock();renderHistory();if(canAdmin()){$('eventName').value=settings.eventName||'';$('lowStock').value=settings.lowStock??10;$('floatDay1').value=openingCash(1);$('floatDay2').value=openingCash(2);$('floatDay3').value=openingCash(3)} }
+function renderProducts(){
+ const box=$('productGrid');box.innerHTML='';
+ products.filter(p=>p.active!==false).forEach(p=>{
+   let q=cart[p.id]||0,r=remaining(p),el=document.createElement('div');el.className='product';
+   el.innerHTML=`<div class="pname">${esc(p.name)}</div><div class="price">${yen(p.price)}</div><div class="small ${r<=Number(settings.lowStock)?'warn':''}">在庫 ${r} 個</div><div class="qtyrow"><button aria-label="減らす">−</button><span class="qty">${q}</span><button aria-label="増やす" ${q>=r?'disabled':''}>＋</button></div>`;
+   let bs=el.querySelectorAll('button');
+   bs[0].onclick=()=>{cart[p.id]=Math.max(0,q-1);if(!cart[p.id])delete cart[p.id];renderProducts()};
+   bs[1].onclick=()=>{if(q<r)cart[p.id]=q+1;renderProducts()};
+   box.appendChild(el);
+ });
+ let items=products.filter(p=>cart[p.id]>0),total=items.reduce((n,p)=>n+p.price*cart[p.id],0),count=items.reduce((n,p)=>n+cart[p.id],0);
+ $('cartTotal').textContent=yen(total);$('cartCount').textContent=count+'点';$('checkoutBtn').disabled=!count||busy;
+ $('day').value=String(day);$('dayLabel').textContent=`営業日 ${day}日目`;
+ $('cashStatus').innerHTML=`<div class="section" style="margin:0 0 8px"><h3 style="margin:0;font-size:15px">レジ現金管理（${day}日目）</h3><span class="muted">概算</span></div><div class="grid"><div><div class="label">レジ準備金</div><div class="stat" style="font-size:20px">${yen(openingCash(day))}</div></div><div><div class="label">想定現金残高</div><div class="stat" style="font-size:20px">${yen(drawerExpected(day))}</div></div></div><div class="small">準備金＋有効会計の売上合計。取消は払い戻しとして差し引きます。実際の紙幣・硬貨を数えた金額ではありません。</div>`;
+}
+function renderSummary(){let ss=activeSales(),rev=sum(ss),cost=costSum(ss),units=ss.reduce((n,s)=>n+s.items.reduce((m,i)=>m+i.qty,0),0);$('summaryCards').innerHTML=[['売上合計',yen(rev)],['原価合計',yen(cost)],['利益',yen(rev-cost)],['販売点数',units+'点'],[`${day}日目のレジ準備金`,yen(openingCash(day))],[`${day}日目の想定現金残高`,yen(drawerExpected(day))]].map(a=>`<div class="card"><div class="label">${a[0]}</div><div class="stat">${a[1]}</div></div>`).join('');$('summaryRows').innerHTML=products.map(p=>{let q=sold(p.id),r=q*p.price,c=q*p.cost;return `<tr><td>${esc(p.name)}</td><td>${q}</td><td>${yen(r)}</td><td>${yen(c)}</td><td>${yen(r-c)}</td><td>${remaining(p)}</td></tr>`}).join('');$('dailyRows').innerHTML=[1,2,3].map(d=>{let a=ss.filter(s=>Number(s.day)===d),u=a.reduce((n,s)=>n+s.items.reduce((m,i)=>m+i.qty,0),0),r=sum(a),c=costSum(a);return `<tr><td>${d}日目</td><td>${a.length}</td><td>${u}</td><td>${yen(r)}</td><td>${yen(c)}</td><td>${yen(r-c)}</td></tr>`}).join('')}
+function renderStock(){$('stockRows').innerHTML=products.map(p=>{let q=sold(p.id),r=remaining(p),low=r<=Number(settings.lowStock);return `<tr><td>${esc(p.name)}${p.active===false?'（停止）':''}</td><td>${yen(p.price)}</td><td>${yen(p.cost)}</td><td>${p.initialStock??p.stock}</td><td>${q}</td><td>${r}</td><td class="${low?'warn':''}">${low?'在庫少':'正常'}</td><td>${canAdmin()?`<button class="secondary" data-edit="${p.id}">編集</button>`:'—'}</td></tr>`}).join('');document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editProduct(b.dataset.edit))}
+function renderHistory(){
+ $('historyRows').innerHTML=[...sales].sort((a,b)=>(b.createdAtMs||0)-(a.createdAtMs||0)).map(s=>`<tr><td>${esc(s.time||'')}</td><td>${s.day}日目</td><td>${esc(s.items.map(i=>i.name+' ×'+i.qty).join('、'))}</td><td>${yen(s.total)}</td><td>${yen(s.receivedAmount??s.total)}</td><td>${yen(s.changeAmount??0)}</td><td class="${s.voided?'warn':''}">${s.voided?'取消済':'有効'}</td><td>${!s.voided&&canAdmin()?`<button class="danger" data-void="${s.id}">取消</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">会計履歴はありません</td></tr>';
+ document.querySelectorAll('[data-void]').forEach(b=>b.onclick=()=>voidSale(b.dataset.void));
+}
+async function loadSettings(){let s=await getDoc(doc(db,'settings','main'));if(s.exists())settings={...settings,...s.data()};else if(canAdmin())await setDoc(doc(db,'settings','main'),settings)}
+function subscribeData(){clearSubs();unsubs.push(onSnapshot(productCol(),snap=>{products=snap.docs.map(d=>({id:d.id,...d.data()}));render()},e=>notice('商品データの読込に失敗：'+e.message,'error')));unsubs.push(onSnapshot(query(salesCol(),orderBy('createdAtMs','desc')),snap=>{sales=snap.docs.map(d=>({id:d.id,...d.data()}));render()},e=>notice('会計履歴の読込に失敗：'+e.message,'error')));unsubs.push(onSnapshot(doc(db,'settings','main'),snap=>{if(snap.exists())settings={...settings,...snap.data()};render()}))}
+async function afterLogin(u){user=u;try{let ur=await getDoc(doc(db,'users',u.uid));if(!ur.exists()||!['admin','staff'].includes(ur.data().role)){let pending=ur.exists()&&ur.data().role==='pending';await signOut(auth);user=null;role=null;showApp(false);notice(pending?'アカウント申請を受け付けました。管理者の承認後にログインできます。':'ユーザー権限が未設定です。管理者に確認してください。','error');return}role=ur.data().role;showApp(true);clearNotice();await loadSettings();subscribeData();render()}catch(e){notice('初期化に失敗：'+e.message,'error')}}
+$('email').value=localStorage.getItem('bunkasai_last_login_email')||'';
+$('rememberEmail').checked=true;
+$('loginBtn').onclick=async()=>{let email=$('email').value.trim(),password=$('password').value;if(!email||!password){notice('メールアドレスとパスワードを入力してください。','error');return}if($('rememberEmail').checked)localStorage.setItem('bunkasai_last_login_email',email);else localStorage.removeItem('bunkasai_last_login_email');try{await signInWithEmailAndPassword(auth,email,password)}catch(e){notice('ログインできません：'+friendlyAuthError(e),'error')} };
+function friendlyAuthError(e){const m={'auth/email-already-in-use':'このメールアドレスは既に登録されています。','auth/invalid-email':'メールアドレスの形式を確認してください。','auth/weak-password':'パスワードは6文字以上にしてください。','auth/invalid-credential':'メールアドレスまたはパスワードが違います。','auth/network-request-failed':'通信に失敗しました。ネットワークを確認してください。','permission-denied':'Firestoreのアクセス権限で拒否されました。firestore.rulesが更新されているか確認してください。'};return m[e?.code]||e?.message||'不明なエラー';}
+$('showSignup').onclick=()=>{$('signupPanel').classList.remove('hidden');$('showSignup').classList.add('hidden');clearNotice()};
+$('hideSignup').onclick=()=>{$('signupPanel').classList.add('hidden');$('showSignup').classList.remove('hidden')};
+$('signupBtn').onclick=async()=>{const email=$('signupEmail').value.trim(),password=$('signupPassword').value,password2=$('signupPassword2').value;if(!email||!password||!password2){notice('メールアドレスとパスワードをすべて入力してください。','error');return}if(password.length<6){notice('パスワードは6文字以上にしてください。','error');return}if(password!==password2){notice('確認用パスワードが一致しません。','error');return}registrationInProgress=true;$('signupBtn').disabled=true;try{const cred=await createUserWithEmailAndPassword(auth,email,password);await setDoc(doc(db,'users',cred.user.uid),{role:'staff',email:cred.user.email,createdAt:serverTimestamp()});await signOut(auth);$('signupPanel').classList.add('hidden');$('showSignup').classList.remove('hidden');$('signupEmail').value='';$('signupPassword').value='';$('signupPassword2').value='';notice('スタッフアカウントを作成しました。登録したメールアドレスとパスワードでログインできます。','success')}catch(e){try{if(auth.currentUser)await signOut(auth)}catch(_){}notice('登録に失敗しました：'+friendlyAuthError(e)+'。Firestoreルールも更新されているか確認してください。','error')}finally{registrationInProgress=false;$('signupBtn').disabled=false}};
+$('logout').onclick=async()=>{clearSubs();await signOut(auth);};
+$('day').onchange=e=>{day=Number(e.target.value);renderProducts();renderSummary()};
+$('checkoutBtn').onclick=()=>openCashCheckout();
+function openCashCheckout(){
+ if(busy)return;
+ const items=products.filter(p=>cart[p.id]>0);if(!items.length)return;
+ const total=items.reduce((n,p)=>n+p.price*cart[p.id],0);
+ openModal(`<h3>現金会計</h3><div class="card"><div class="label">お会計合計</div><div class="stat">${yen(total)}</div></div>
+ <div class="field"><label>預かり金（円）</label><input id="cashReceived" type="number" min="0" step="1" inputmode="numeric" value="${total}"></div>
+ <div class="grid"><div class="card"><div class="label">お釣り</div><div class="stat" id="cashChange">${yen(0)}</div></div><div class="card"><div class="label">レジ準備金（${day}日目）</div><div class="stat">${yen(openingCash(day))}</div></div></div>
+ <div class="actions"><button class="secondary" id="cashExact">ちょうど</button><button class="secondary" id="cashAdd1000">＋1,000円</button><button class="secondary" id="cashAdd5000">＋5,000円</button></div>
+ <div class="actions"><button class="primary" id="cashConfirm">会計を確定</button><button class="secondary" id="cashCancel">戻る</button></div>
+ <p class="small">金額を確認してから確定してください。確定後は会計履歴に預かり金とお釣りを記録します。</p>`);
+ const input=$('cashReceived');
+ const refresh=()=>{const received=Number(input.value);const change=received-total;$('cashChange').textContent=yen(Math.max(0,change));$('cashChange').classList.toggle('warn',!Number.isInteger(received)||received<total)};
+ input.addEventListener('input',refresh);
+ $('cashExact').onclick=()=>{input.value=String(total);refresh()};
+ $('cashAdd1000').onclick=()=>{input.value=String(Math.max(total,Number(input.value)||0)+1000);refresh()};
+ $('cashAdd5000').onclick=()=>{input.value=String(Math.max(total,Number(input.value)||0)+5000);refresh()};
+ $('cashCancel').onclick=closeModal;
+ $('cashConfirm').onclick=()=>{const received=Number(input.value);if(!Number.isInteger(received)||received<total){notice('預かり金は合計金額以上の整数で入力してください。','error');return}closeModal();completeCheckout(received)};
+}
+async function completeCheckout(receivedAmount){
+ if(busy)return;
+ const items=products.filter(p=>cart[p.id]>0).map(p=>({id:p.id,name:p.name,price:Number(p.price),cost:Number(p.cost),qty:cart[p.id]}));
+ if(!items.length)return;
+ const total=items.reduce((n,i)=>n+i.price*i.qty,0);
+ if(!Number.isInteger(receivedAmount)||receivedAmount<total){notice('預かり金が不足しています。','error');return}
+ busy=true;renderProducts();
+ try{
+   const sid=crypto.randomUUID(),saleRef=doc(db,'sales',sid),refs=items.map(i=>({item:i,ref:doc(db,'products',i.id)}));
+   await runTransaction(db,async tx=>{
+     let snaps=[];for(const x of refs)snaps.push(await tx.get(x.ref));
+     for(let j=0;j<refs.length;j++){let p=snaps[j].data();if(!p||p.active===false)throw Error(refs[j].item.name+'は販売停止です');if(Number(p.stock)-refs[j].item.qty<0)throw Error(refs[j].item.name+'の在庫が不足しています');}
+     for(let j=0;j<refs.length;j++){let p=snaps[j].data();tx.update(refs[j].ref,{stock:Number(p.stock)-refs[j].item.qty,updatedAt:serverTimestamp()})}
+     tx.set(saleRef,{time:new Date().toLocaleString('ja-JP',{hour12:false}),createdAtMs:Date.now(),createdAt:serverTimestamp(),day,items,total,receivedAmount,changeAmount:receivedAmount-total,voided:false,cashierUid:user.uid,cashierEmail:user.email||''});
+   });
+   cart={};notice(`会計を確定しました。預かり金 ${yen(receivedAmount)} ／ お釣り ${yen(receivedAmount-total)}`,'success')
+ }catch(e){notice('会計できませんでした：'+e.message,'error')}
+ finally{busy=false;render()}
+}
+function itemsSoldFromLocal(id){return sold(id)}
+async function voidSale(id){let s=sales.find(x=>x.id===id);if(!s||s.voided||!confirm('この会計を取り消しますか？在庫を戻し、取消履歴を残します。'))return;try{await runTransaction(db,async tx=>{let sr=doc(db,'sales',id),ss=await tx.get(sr);if(!ss.exists()||ss.data().voided)throw Error('会計はすでに取消済みです');let sale=ss.data();let refs=sale.items.map(i=>({i,ref:doc(db,'products',i.id)})),snaps=[];for(let x of refs)snaps.push(await tx.get(x.ref));refs.forEach((x,j)=>{if(snaps[j].exists())tx.update(x.ref,{stock:Number(snaps[j].data().stock)+x.i.qty,updatedAt:serverTimestamp()})});tx.update(sr,{voided:true,voidedAt:new Date().toLocaleString('ja-JP',{hour12:false}),voidedBy:user.uid})});notice('会計を取り消しました。','success')}catch(e){notice('取消に失敗：'+e.message,'error')}}
+function openModal(content){$('modalRoot').className='modalback';$('modalRoot').innerHTML=`<div class="modal">${content}</div>`}function closeModal(){$('modalRoot').className='hidden';$('modalRoot').innerHTML=''}
+function editProduct(id){if(!canAdmin())return;let p=products.find(x=>x.id===id);openModal(`<h3>商品編集</h3><div class="field"><label>商品名</label><input id="mName" value="${esc(p.name)}"></div><div class="formgrid"><div class="field"><label>販売価格（円）</label><input id="mPrice" type="number" min="0" value="${p.price}"></div><div class="field"><label>原価（円）</label><input id="mCost" type="number" min="0" value="${p.cost}"></div><div class="field"><label>現在庫数</label><input id="mStock" type="number" min="0" value="${p.stock}"></div></div><label><input type="checkbox" id="mActive" ${p.active!==false?'checked':''}> 販売中</label><div class="actions"><button class="primary" id="mSave">保存</button><button class="secondary" id="mClose">閉じる</button></div>`);$('mClose').onclick=closeModal;$('mSave').onclick=async()=>{let name=$('mName').value.trim(),price=Number($('mPrice').value),cost=Number($('mCost').value),stock=Number($('mStock').value);if(!name||[price,cost,stock].some(n=>!Number.isFinite(n)||n<0)||!Number.isInteger(stock)){alert('入力内容を確認してください。');return}try{await updateDoc(doc(db,'products',id),{name,price,cost,stock,initialStock:Number(p.initialStock??p.stock),active:$('mActive').checked,updatedAt:serverTimestamp()});closeModal()}catch(e){alert('保存に失敗：'+e.message)}}}
+$('addProduct').onclick=()=>{if(!canAdmin())return;openModal(`<h3>商品追加</h3><div class="field"><label>商品名</label><input id="mName"></div><div class="formgrid"><div class="field"><label>販売価格（円）</label><input id="mPrice" type="number" min="0" value="100"></div><div class="field"><label>原価（円）</label><input id="mCost" type="number" min="0" value="0"></div><div class="field"><label>仕入数</label><input id="mStock" type="number" min="0" value="0"></div></div><div class="actions"><button class="primary" id="mSave">追加</button><button class="secondary" id="mClose">閉じる</button></div>`);$('mClose').onclick=closeModal;$('mSave').onclick=async()=>{let name=$('mName').value.trim(),price=Number($('mPrice').value),cost=Number($('mCost').value),stock=Number($('mStock').value);if(!name||[price,cost,stock].some(n=>!Number.isFinite(n)||n<0)||!Number.isInteger(stock)){alert('入力内容を確認してください。');return}try{await addDoc(productCol(),{name,price,cost,stock,initialStock:stock,active:true,createdAt:serverTimestamp()});closeModal()}catch(e){alert('追加に失敗：'+e.message)}}};
+$('saveSettings').onclick=async()=>{if(!canAdmin())return;const floatValues=[$('floatDay1').value,$('floatDay2').value,$('floatDay3').value].map(Number);if(floatValues.some(n=>!Number.isInteger(n)||n<0)){notice('レジ準備金は0円以上の整数で入力してください。','error');return}try{await setDoc(doc(db,'settings','main'),{eventName:$('eventName').value.trim()||'文化祭 模擬店',lowStock:Math.max(0,Number($('lowStock').value)||0),openingCashByDay:{'1':floatValues[0],'2':floatValues[1],'3':floatValues[2]}},{merge:true});notice('設定を保存しました。','success');renderProducts();renderSummary()}catch(e){notice('設定保存に失敗：'+e.message,'error')}};
+async function loadPendingUsers(){if(!canAdmin())return;$('pendingRows').innerHTML='<tr><td colspan="4" class="empty">読み込み中…</td></tr>';try{const snap=await getDocs(collection(db,'users'));if(snap.empty){$('pendingRows').innerHTML='<tr><td colspan="4" class="empty">アカウントがありません</td></tr>';return}const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(a.email||a.id).localeCompare(String(b.email||b.id)));$('pendingRows').innerHTML=rows.map(u=>{const current=['admin','staff'].includes(u.role)?u.role:'未設定';const self=u.id===user.uid;return `<tr><td>${esc(u.email||u.id)}${self?'（自分）':''}</td><td>${esc(current)}</td><td><select id="role-${esc(u.id)}" ${self?'disabled':''}><option value="staff" ${u.role==='staff'?'selected':''}>会計スタッフ</option><option value="admin" ${u.role==='admin'?'selected':''}>管理者</option></select></td><td>${self?'自分の権限は変更不可':`<button class="primary" data-save-role="${esc(u.id)}" ${!['staff','admin'].includes(u.role)?'':' '}>権限を保存</button>`}</td></tr>`}).join('');document.querySelectorAll('[data-save-role]').forEach(b=>b.onclick=async()=>{const uid=b.dataset.saveRole;if(uid===user.uid){notice('自分自身の権限は変更できません。','error');return}const nextRole=$('role-'+uid).value;if(!['staff','admin'].includes(nextRole))return;if(!confirm(`このアカウントの権限を「${nextRole==='admin'?'管理者':'会計スタッフ'}」に変更しますか？`))return;b.disabled=true;try{await updateDoc(doc(db,'users',uid),{role:nextRole});notice('権限を変更しました。','success');await loadPendingUsers()}catch(e){notice('権限変更に失敗しました：'+e.message,'error');b.disabled=false}})}catch(e){$('pendingRows').innerHTML='<tr><td colspan="4" class="empty">アカウント一覧を読み込めません。Firestoreルールを確認してください。</td></tr>';notice('アカウント一覧の読込に失敗：'+e.message,'error')}}
+$('refreshPending').onclick=loadPendingUsers;
+function csv(name,rows){let data=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),blob=new Blob(['\ufeff'+data],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+$('exportSummary').onclick=()=>{let rows=[['商品','販売数','売上','原価','利益','残在庫'],...products.map(p=>{let q=sold(p.id);return[p.name,q,q*p.price,q*p.cost,q*(p.price-p.cost),remaining(p)]}),[],['日別','会計件数','販売点数','売上','原価','利益']];[1,2,3].forEach(d=>{let ss=activeSales().filter(s=>Number(s.day)===d),u=ss.reduce((n,s)=>n+s.items.reduce((m,i)=>m+i.qty,0),0),r=sum(ss),c=costSum(ss);rows.push([d+'日目',ss.length,u,r,c,r-c])});csv('文化祭_売上利益.csv',rows)};
+$('exportHistory').onclick=()=>csv('文化祭_会計履歴.csv',[['ID','日時','日','明細','合計','預かり金','お釣り','状態','取消日時','担当者'],...sales.map(s=>[s.id,s.time,s.day,s.items.map(i=>`${i.name} x${i.qty}`).join(' / '),s.total,s.receivedAmount??s.total,s.changeAmount??0,s.voided?'取消済':'有効',s.voidedAt||'',s.cashierEmail||s.cashierUid])]);
+$('backup').onclick=()=>{let blob=new Blob([JSON.stringify({settings,products,sales},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='文化祭会計バックアップ.json';a.click();URL.revokeObjectURL(url)};
+$('seed').onclick=async()=>{if(!canAdmin())return;if(products.length){notice('商品が既に登録されています。初期商品を再登録すると在庫を上書きする恐れがあるため中止しました。','error');return}try{for(const [idx,p] of seedProducts.entries())await setDoc(doc(db,'products','seed-'+(idx+1)),{name:p[0],price:p[1],cost:p[2],stock:p[3],initialStock:p[3],active:true,createdAt:serverTimestamp()},{merge:false});notice('初期商品を登録しました。不要な商品は在庫画面で編集してください。','success')}catch(e){notice('初期登録に失敗：'+e.message,'error')}};
+function validateConfig(){return firebaseConfig&&firebaseConfig.apiKey&&firebaseConfig.apiKey!=='YOUR_API_KEY'&&firebaseConfig.projectId&&firebaseConfig.projectId!=='YOUR_PROJECT_ID'}
+if(!validateConfig()){notice('Firebase設定が未入力です。配布ZIP内の firebase-config.js を設定ガイドに従って編集してください。','error');$('loginBtn').disabled=true}
+else{app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);setPersistence(auth,browserLocalPersistence).then(()=>onAuthStateChanged(auth,u=>{if(registrationInProgress&&u)return;if(u)afterLogin(u);else{clearSubs();user=null;role=null;showApp(false);$('connection').textContent='未ログイン'}})).catch(e=>notice('ログイン状態の保存設定に失敗しました：'+e.message,'error'))}
+</script>
+</body></html>
