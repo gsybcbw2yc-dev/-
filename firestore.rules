@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isAdmin() { return signedIn() && userRole() == 'admin'; }
+    function isStaff() { return signedIn() && (userRole() == 'staff' || userRole() == 'admin'); }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // Set roles through Firebase Console/admin tooling, not through this public client.
+      allow write: if false;
+    }
+    match /settings/{id} {
+      allow read: if isStaff();
+      allow create, update, delete: if isAdmin();
+    }
+    match /products/{id} {
+      allow read: if isStaff();
+      allow create, delete: if isAdmin();
+      // Staff can only decrement stock on checkout; they cannot change product metadata.
+      allow update: if isAdmin() ||
+        (isStaff()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock','updatedAt'])
+          && request.resource.data.stock is number
+          && request.resource.data.stock >= 0
+          && request.resource.data.stock < resource.data.stock);
+    }
+    match /sales/{id} {
+      allow read: if isStaff();
+      allow create: if isStaff()
+        && request.resource.data.cashierUid == request.auth.uid
+        && request.resource.data.voided == false
+        && request.resource.data.total is number
+        && request.resource.data.total >= 0
+        && request.resource.data.items is list;
+      // Cancellation restores stock; restrict it to admins so staff cannot forge stock increases.
+      allow update: if isAdmin()
+        && resource.data.voided == false
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['voided','voidedAt','voidedBy'])
+        && request.resource.data.voided == true;
+      allow delete: if false;
+    }
+  }
+}
