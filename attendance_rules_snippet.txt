@@ -1,0 +1,21 @@
+Firestoreルールへの追加（既存ルールを全置換しないでください）
+
+既存の firestore.rules の中で、最後の閉じ括弧より前、つまり
+  match /databases/{database}/documents {
+の内側に、次の match ブロックを追加してください。
+
+match /attendance/{recordId} {
+  allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+  allow create: if isStaff()
+    && request.resource.data.uid == request.auth.uid
+    && request.resource.data.day in [1, 2, 3]
+    && request.resource.data.keys().hasOnly(['uid','email','day','clockIn','breakStart','breakEnd','clockOut','status','updatedAt']);
+  allow update: if isStaff()
+    && resource.data.uid == request.auth.uid
+    && request.resource.data.uid == request.auth.uid
+    && request.resource.data.day == resource.data.day
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clockIn','breakStart','breakEnd','clockOut','status','updatedAt']);
+  allow delete: if isAdmin();
+}
+
+※ 既存ルールに signedIn() / isStaff() / isAdmin() が定義されていることが前提です。
